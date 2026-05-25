@@ -11,7 +11,7 @@ type Document = {
   url?: string;
 };
 
-export default function DocManager({ onPreviewDoc }: { onPreviewDoc: (doc: { id: string; name: string }) => void }) {
+export default function DocManager({ onPreviewDoc }: { onPreviewDoc: (doc: { id: string; name: string; url?: string }) => void }) {
   const [documents, setDocuments] = useState<Document[]>([
     { id: "1", name: "Invoice_Zagros_500.pdf", uploadDate: "2026-05-20T10:00:00Z", size: 1024 * 450 },
     { id: "2", name: "Q1_Financial_Report.docx", uploadDate: "2026-05-22T14:30:00Z", size: 1024 * 1200 },
@@ -65,7 +65,7 @@ export default function DocManager({ onPreviewDoc }: { onPreviewDoc: (doc: { id:
         size: file.size,
         url: URL.createObjectURL(file), // Generate local URL for preview
       };
-      
+
       setDocuments((prev) => [newDoc, ...prev]);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -96,11 +96,10 @@ export default function DocManager({ onPreviewDoc }: { onPreviewDoc: (doc: { id:
 
       {/* Upload Zone */}
       <div
-        className={`border border-dashed rounded-2xl p-10 text-center transition-all duration-200 flex flex-col items-center justify-center ${
-          isDragging
-            ? "border-black bg-gray-50"
-            : "border-gray-200 bg-white hover:border-gray-300"
-        }`}
+        className={`border border-dashed rounded-2xl p-10 text-center transition-all duration-200 flex flex-col items-center justify-center ${isDragging
+          ? "border-black bg-gray-50"
+          : "border-gray-200 bg-white hover:border-gray-300"
+          }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -114,7 +113,7 @@ export default function DocManager({ onPreviewDoc }: { onPreviewDoc: (doc: { id:
         <p className="text-xs text-gray-400 mb-6">
           PDF, DOCX, TXT up to 50MB
         </p>
-        
+
         <label className="relative inline-flex items-center justify-center px-5 py-2 text-xs font-medium text-black transition-colors bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer disabled:opacity-50">
           <span>Browse Files</span>
           <input

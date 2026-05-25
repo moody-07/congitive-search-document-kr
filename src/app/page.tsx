@@ -3,9 +3,8 @@
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import SearchTab from "@/components/SearchTab";
-import DocManager from "@/components/DocManager";
+import { DocManager } from "@/components/DocManager";
 import LogsTab from "@/components/LogsTab";
-
 import DocumentPreview, { PreviewDoc } from "@/components/DocumentPreview";
 
 import { SearchLog } from "@/types";
@@ -28,7 +27,7 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-white text-gray-900 font-sans">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <main className="flex-1 overflow-y-auto relative">
         {activeTab === "search" && <SearchTab onSearchComplete={addSearchLog} onPreviewDoc={setPreviewDoc} />}
         {activeTab === "documents" && <DocManager onPreviewDoc={setPreviewDoc} />}
