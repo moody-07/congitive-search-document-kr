@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AzureOpenAI } from "openai";
+import { OpenAI } from "openai";
 import { ContainerClient } from "@azure/storage-blob";
 
 // ── Azure OpenAI client ──────────────────────────────────────────────────────
@@ -10,11 +10,13 @@ const MODEL     = "gpt-5.1";
 const API_VER   = "2024-12-01-preview";
 
 function getAIClient() {
-  return new AzureOpenAI({
-    endpoint:   ENDPOINT,
-    apiKey:     API_KEY,
-    deployment: MODEL,
-    apiVersion: API_VER,
+  // Using standard OpenAI client configured for Azure to avoid Netlify environment variable conflicts
+  // that cause "baseURL and endpoint are mutually exclusive" errors in the AzureOpenAI wrapper.
+  return new OpenAI({
+    baseURL: `${ENDPOINT}openai/deployments/${MODEL}`,
+    apiKey: API_KEY,
+    defaultQuery: { "api-version": API_VER },
+    defaultHeaders: { "api-key": API_KEY },
   });
 }
 
