@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import SearchTab from "@/components/SearchTab";
-import { DocManager } from "@/components/DocManager";
+import DocManager from "@/components/DocManager";
 import LogsTab from "@/components/LogsTab";
 import DocumentPreview, { PreviewDoc } from "@/components/DocumentPreview";
 

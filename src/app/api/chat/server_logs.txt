@@ -1,0 +1,216 @@
+[PDF START] Parsing blob: 1780216344571-4693_923_2_241225_2515524029.pdf, Buffer size: 179713 bytes
+[ERROR] Blob: 1780216344571-4693_923_2_241225_2515524029.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216169293-Print_Quotation_USD.pdf, Buffer size: 303261 bytes
+[ERROR] Blob: 1780216169293-Print_Quotation_USD.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216336123-6129_230_51_110914_1440240681a.pdf, Buffer size: 299252 bytes
+[ERROR] Blob: 1780216336123-6129_230_51_110914_1440240681a.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216312307-242-25_1_2_020226_2515629122.pdf, Buffer size: 267491 bytes
+[ERROR] Blob: 1780216312307-242-25_1_2_020226_2515629122.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216138198-Print_Invoice_-_Dinar.pdf, Buffer size: 264582 bytes
+[ERROR] Blob: 1780216138198-Print_Invoice_-_Dinar.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216164506-Offer-Microsoft_365.pdf, Buffer size: 278357 bytes
+[ERROR] Blob: 1780216164506-Offer-Microsoft_365.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216318082-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216318082-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216323518-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216323518-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216347502-120521027_17_1_020314_120521026.pdf, Buffer size: 869429 bytes
+[ERROR] Blob: 1780216347502-120521027_17_1_020314_120521026.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf, Buffer size: 2609946 bytes
+[ERROR] Blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216318082-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216318082-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216164506-Offer-Microsoft_365.pdf, Buffer size: 278357 bytes
+[ERROR] Blob: 1780216164506-Offer-Microsoft_365.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216336123-6129_230_51_110914_1440240681a.pdf, Buffer size: 299252 bytes
+[ERROR] Blob: 1780216336123-6129_230_51_110914_1440240681a.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216138198-Print_Invoice_-_Dinar.pdf, Buffer size: 264582 bytes
+[ERROR] Blob: 1780216138198-Print_Invoice_-_Dinar.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216323518-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216323518-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216344571-4693_923_2_241225_2515524029.pdf, Buffer size: 179713 bytes
+[ERROR] Blob: 1780216344571-4693_923_2_241225_2515524029.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216169293-Print_Quotation_USD.pdf, Buffer size: 303261 bytes
+[ERROR] Blob: 1780216169293-Print_Quotation_USD.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216312307-242-25_1_2_020226_2515629122.pdf, Buffer size: 267491 bytes
+[ERROR] Blob: 1780216312307-242-25_1_2_020226_2515629122.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216347502-120521027_17_1_020314_120521026.pdf, Buffer size: 869429 bytes
+[ERROR] Blob: 1780216347502-120521027_17_1_020314_120521026.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf, Buffer size: 2609946 bytes
+[ERROR] Blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216344571-4693_923_2_241225_2515524029.pdf, Buffer size: 179713 bytes
+[ERROR] Blob: 1780216344571-4693_923_2_241225_2515524029.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216318082-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216318082-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216323518-184-25_1_2_310126_2515629105.pdf, Buffer size: 337190 bytes
+[ERROR] Blob: 1780216323518-184-25_1_2_310126_2515629105.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216312307-242-25_1_2_020226_2515629122.pdf, Buffer size: 267491 bytes
+[ERROR] Blob: 1780216312307-242-25_1_2_020226_2515629122.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216169293-Print_Quotation_USD.pdf, Buffer size: 303261 bytes
+[ERROR] Blob: 1780216169293-Print_Quotation_USD.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216164506-Offer-Microsoft_365.pdf, Buffer size: 278357 bytes
+[ERROR] Blob: 1780216164506-Offer-Microsoft_365.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216340561-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf, Buffer size: 535829 bytes
+[ERROR] Blob: 1780216350505-242-25_1_2_020226_2515629122-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216138198-Print_Invoice_-_Dinar.pdf, Buffer size: 264582 bytes
+[ERROR] Blob: 1780216138198-Print_Invoice_-_Dinar.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216336123-6129_230_51_110914_1440240681a.pdf, Buffer size: 299252 bytes
+[ERROR] Blob: 1780216336123-6129_230_51_110914_1440240681a.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216347502-120521027_17_1_020314_120521026.pdf, Buffer size: 869429 bytes
+[ERROR] Blob: 1780216347502-120521027_17_1_020314_120521026.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[PDF START] Parsing blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf, Buffer size: 2609946 bytes
+[ERROR] Blob: 1780216329975-184-25_1_2_310126_2515629105-1.pdf
+Message: Error: Setting up fake worker failed: "Cannot find module 'D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\pdf.worker.mjs' imported from D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js".
+    at D:\Ai\Document Search-KR\congitive-search-document-kr\.next\dev\server\chunks\node_modules_pdfjs-dist_legacy_build_pdf_mjs_108wwko._.js:20320:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+

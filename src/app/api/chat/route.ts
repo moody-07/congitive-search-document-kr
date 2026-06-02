@@ -1,118 +1,180 @@
 import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
+import { AzureOpenAI } from "openai";
+import { ContainerClient } from "@azure/storage-blob";
 
-// ============================================================================
-// AZURE OPENAI INTEGRATION
-// ============================================================================
-// Ensure these environment variables are set in your .env.local:
-// AZURE_OPENAI_API_KEY=your_api_key_here
-// AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
-// AZURE_OPENAI_DEPLOYMENT_NAME=your_model_deployment_name (e.g., gpt-4)
-// ============================================================================
+// ── Azure OpenAI client ──────────────────────────────────────────────────────
 
-const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-const apiKey = process.env.AZURE_OPENAI_API_KEY;
-const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
+const ENDPOINT  = "https://filechecker-foundary.cognitiveservices.azure.com/";
+const API_KEY   = process.env.AZURE_OPENAI_API_KEY!;
+const MODEL     = "gpt-5.1";
+const API_VER   = "2024-12-01-preview";
+
+function getAIClient() {
+  return new AzureOpenAI({
+    endpoint:   ENDPOINT,
+    apiKey:     API_KEY,
+    deployment: MODEL,
+    apiVersion: API_VER,
+  });
+}
+
+// ── Azure Blob helpers ───────────────────────────────────────────────────────
+
+function getContainerClient(): ContainerClient {
+  const accountUrl   = process.env.AZURE_STORAGE_ACCOUNT_URL!;
+  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
+  const sasToken     = process.env.AZURE_STORAGE_SAS_TOKEN!;
+
+  if (!accountUrl || !containerName || !sasToken) {
+    throw new Error("Azure Storage credentials are not configured.");
+  }
+
+  const cleanSas = sasToken.startsWith("?") ? sasToken.slice(1) : sasToken;
+  return new ContainerClient(
+    `${accountUrl.replace(/\/$/, "")}/${containerName}?${cleanSas}`
+  );
+}
+
+/** Fetch all OCR text files from Blob Storage and return them as a map of filename → text. */
+async function loadAllOcrDocuments(): Promise<{ name: string; text: string }[]> {
+  const container = getContainerClient();
+  const docs: { name: string; text: string }[] = [];
+
+  for await (const blob of container.listBlobsFlat()) {
+    if (!blob.name.endsWith(".ocr.txt")) continue;
+
+    // Derive the human-readable original filename from the blob name:
+    // format: <timestamp>-<safeName>.ocr.txt
+    const displayName = blob.name
+      .replace(/\.ocr\.txt$/, "")   // strip .ocr.txt
+      .replace(/^\d+-/, "");         // strip leading timestamp
+
+    try {
+      const blobClient = container.getBlobClient(blob.name);
+      const download = await blobClient.download();
+      const chunks: Buffer[] = [];
+      for await (const chunk of download.readableStreamBody as AsyncIterable<Buffer>) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const text = Buffer.concat(chunks).toString("utf-8").trim();
+
+      // Skip empty / failed OCR blobs
+      if (text && !text.startsWith("[OCR failed:")) {
+        docs.push({ name: displayName, text });
+      }
+    } catch (e) {
+      console.warn(`[chat] Could not read blob ${blob.name}:`, e);
+    }
+  }
+
+  return docs;
+}
+
+// ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
 
-    if (!query) {
+    if (!query?.trim()) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    // ------------------------------------------------------------------------
-    // RAG WORKFLOW IMPLEMENTATION INSTRUCTIONS
-    // ------------------------------------------------------------------------
-    // 
-    // Step 1: Embed the Query
-    // - Use an embedding model (like text-embedding-ada-002) to convert the user's `query` into a vector.
-    // - e.g., const embedding = await openai.embeddings.create({ input: query, model: "your-embedding-deployment" })
-    //
-    // Step 2: Vector Search
-    // - Search your vector database (e.g., Azure AI Search, Pinecone, or PostgreSQL with pgvector)
-    //   using the embedding vector from Step 1.
-    // - Retrieve the top K most relevant text chunks from your documents.
-    // 
-    // Step 3: Extract Context from Azure Blob Storage (if needed)
-    // - If your vector DB only stores metadata/pointers, use the retrieved pointers to 
-    //   download the actual text content from Azure Blob Storage.
-    //
-    // Step 4: Construct the Prompt
-    // - Combine the retrieved text chunks to form a single context string.
-    // - Construct a system prompt that tells the AI to answer the query *only* using the provided context.
-    // ------------------------------------------------------------------------
+    // 1. Load every OCR document from Blob Storage
+    const docs = await loadAllOcrDocuments();
 
-    // MOCK RAG Context (Replace with actual retrieval logic)
-    const mockRetrievedContext = "Zagros Solutions was paid $500 on May 20, 2026 for IT consulting services. This is documented in Invoice_Zagros_500.pdf.";
-    
-    // MOCK Source Documents (Replace with actual retrieved metadata)
-    const sources = [
-      { title: "Invoice_Zagros_500.pdf", score: 0.92 }
-    ];
-
-    // Check if Azure OpenAI credentials are provided
-    if (!endpoint || !apiKey || !deployment) {
-      console.warn("Azure OpenAI credentials are missing. Returning mock response.");
-      // Return a mock response if no API keys are present so the UI still works
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
-      
+    if (docs.length === 0) {
       return NextResponse.json({
-        answer: "Based on the documents, you paid $500 to Zagros Solutions for IT consulting services on May 20, 2026.",
-        summary: "The retrieved documents contain financial records, specifically an invoice from Zagros Solutions detailing a payment of $500.",
-        sources: sources
+        answer: "هیچ فایلێک بار نەکراوە. تکایە پێشتر فایلەکان بار بکە.",
+        summary: "No documents have been uploaded yet.",
+        sources: [],
       });
     }
 
-    // Initialize OpenAI client for Azure
-    const client = new OpenAI({
-      apiKey: apiKey,
-      baseURL: `${endpoint}/openai/deployments/${deployment}`,
-      defaultQuery: { "api-version": "2024-02-15-preview" },
-      defaultHeaders: { "api-key": apiKey },
-    });
+    // 2. Build the full context block — one section per document
+    const contextBlock = docs
+      .map(
+        (doc, i) =>
+          `=== فایل ${i + 1}: ${doc.name} ===\n${doc.text}\n=== کۆتایی فایل ${i + 1} ===`
+      )
+      .join("\n\n");
 
-    // Construct the actual prompt using the retrieved context
-    const messages = [
-      { 
-        role: "system", 
-        content: `You are an intelligent document analysis assistant. Answer the user's question based strictly on the following context. 
-                  Provide a direct answer, followed by a brief summary of the context. 
-                  Format your response as a JSON object with two keys: "answer" and "summary".
-                  
-                  Context: ${mockRetrievedContext}` 
-      },
-      { 
-        role: "user", 
-        content: query 
-      }
-    ];
+    // 3. System prompt — Kurdish-first, multilingual
+    const systemPrompt = `You are an expert document analyst specializing in Kurdish (Sorani), Arabic, and Persian documents related to construction projects, government contracts, and urban development.
+
+Your task:
+- Read ALL the documents provided below carefully.
+- Find ALL documents that are relevant to the user's question (there may be more than one).
+- Answer the question directly and accurately.
+- Always respond in the SAME language as the user's question. If the question is in Kurdish (Sorani), answer fully in Kurdish (Sorani).
+- Be specific: extract dates, names, amounts, locations, and project details when asked.
+- If no document contains the answer, say so clearly.
+
+Return your response as a JSON object with exactly these keys:
+{
+  "answer": "<your detailed answer in the same language as the question>",
+  "summary": "<a short 1-2 sentence summary>",
+  "sources": [
+    { "title": "<filename of MOST relevant doc>", "note": "<one sentence why this is most relevant>" },
+    { "title": "<filename of second relevant doc>", "note": "<one sentence why>" }
+  ]
+}
+
+Rules for sources:
+- Order sources from MOST relevant to LEAST relevant.
+- Include ALL documents that mention or relate to the question — do not omit any.
+- The "note" should be in the same language as the user's question.
+- Do NOT include documents that have no relation to the question.
+
+Do NOT wrap the JSON in markdown code blocks.
+
+--- DOCUMENTS ---
+${contextBlock}
+--- END OF DOCUMENTS ---`;
+
+    // 4. Call GPT-5.1
+    const client = getAIClient();
 
     const response = await client.chat.completions.create({
-      messages: messages as any,
-      model: deployment, // Ignored by Azure, but required by OpenAI SDK
-      response_format: { type: "json_object" }
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: query },
+      ],
+      response_format: { type: "json_object" },
+      max_completion_tokens: 4096,
     });
 
-    const aiResponse = response.choices[0].message.content;
-    let parsedResponse;
+    const raw = response.choices[0]?.message?.content ?? "{}";
+
+    let parsed: {
+      answer?: string;
+      summary?: string;
+      sources?: ({ title: string; note?: string } | string)[];
+    };
     try {
-      parsedResponse = JSON.parse(aiResponse || "{}");
-    } catch (e) {
-      parsedResponse = { answer: aiResponse, summary: "Summary unavailable." };
+      parsed = JSON.parse(raw);
+    } catch {
+      parsed = { answer: raw, summary: "" };
     }
 
+    // Normalise sources — GPT may return objects or plain strings
+    const sources = (parsed.sources ?? []).map((s) => ({
+      title: typeof s === "string" ? s : s.title,
+      note:  typeof s === "string" ? "" : (s.note ?? ""),
+    }));
+
     return NextResponse.json({
-      answer: parsedResponse.answer || "I couldn't find a specific answer.",
-      summary: parsedResponse.summary || "No summary available.",
-      sources: sources
+      answer:  parsed.answer  || "ناتوانم وەڵامێکی دیاری بدەمەوە.",
+      summary: parsed.summary || "",
+      sources,
     });
 
-  } catch (error: any) {
-    console.error("Error in chat API:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[chat] Error:", message);
     return NextResponse.json(
-      { error: "Failed to process the query. Ensure Azure credentials are correct." },
+      { error: `Failed to process query: ${message}` },
       { status: 500 }
     );
   }

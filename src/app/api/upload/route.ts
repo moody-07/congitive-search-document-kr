@@ -1,84 +1,142 @@
 import { NextResponse } from "next/server";
-import { BlobServiceClient } from "@azure/storage-blob";
+import { ContainerClient } from "@azure/storage-blob";
 
-// ============================================================================
-// AZURE BLOB STORAGE INTEGRATION
-// ============================================================================
-// Ensure these environment variables are set in your .env.local:
-// AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...
-// AZURE_STORAGE_CONTAINER_NAME=documents
-// ============================================================================
+// ── helpers ─────────────────────────────────────────────────────────────────
+
+function getContainerClient(): ContainerClient {
+  const accountUrl    = process.env.AZURE_STORAGE_ACCOUNT_URL!;
+  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
+  const sasToken      = process.env.AZURE_STORAGE_SAS_TOKEN!;
+
+  if (!accountUrl || !containerName || !sasToken) {
+    throw new Error("Azure Storage credentials are not configured.");
+  }
+
+  const cleanSas = sasToken.startsWith("?") ? sasToken.slice(1) : sasToken;
+  return new ContainerClient(
+    `${accountUrl.replace(/\/$/, "")}/${containerName}?${cleanSas}`
+  );
+}
+
+/** Upload a buffer to Azure Blob Storage and return the public URL. */
+async function uploadToBlob(
+  containerClient: ContainerClient,
+  blobName: string,
+  data: Buffer,
+  contentType: string
+): Promise<string> {
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+  await blockBlobClient.uploadData(data, {
+    blobHTTPHeaders: { blobContentType: contentType },
+  });
+  return blockBlobClient.url;
+}
+
+/** Call the external OCR API and return extracted text. */
+async function runOcr(file: File): Promise<string> {
+  const OCR_URL    = "https://stt.roshnaisunat.com/upload/";
+  const OCR_TOKEN  = "85pou";
+  const OCR_PROMPT = "تكایە دەقە لەوێنەكە بهێنەدەرەوە";
+
+  const form = new FormData();
+  form.append("file", file, file.name);
+  form.append("mime_type", file.type || "application/octet-stream");
+  form.append("user_message", OCR_PROMPT);
+
+  const res = await fetch(OCR_URL, {
+    method: "POST",
+    headers: {
+      accept: "text/plain",
+      "X-API-Token": OCR_TOKEN,
+    },
+    body: form,
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`OCR API error (${res.status}): ${errText}`);
+  }
+
+  return await res.text();
+}
+
+// ── route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    // Support single file OR multiple files under field name "file"
+    const rawFiles = formData.getAll("file");
+    const files = rawFiles.filter((f): f is File => f instanceof File);
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: "No file(s) provided." }, { status: 400 });
     }
 
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-    const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
+    const containerClient = getContainerClient();
+    const results: {
+      fileName: string;
+      blobName: string;
+      blobUrl: string;
+      ocrBlobName: string;
+      ocrBlobUrl: string;
+      ocrText: string;
+    }[] = [];
 
-    // If credentials are not provided, mock the upload success for frontend testing
-    if (!connectionString || !containerName) {
-      console.warn("Azure Storage credentials missing. Simulating successful upload.");
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-      
-      return NextResponse.json({ 
-        message: "File upload simulated successfully",
-        fileName: file.name,
-        size: file.size
+    for (const file of files) {
+      // 1. Upload original file
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+      const blobName = `${Date.now()}-${safeName}`;
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const blobUrl = await uploadToBlob(
+        containerClient,
+        blobName,
+        buffer,
+        file.type || "application/octet-stream"
+      );
+
+      // 2. Run OCR
+      let ocrText = "";
+      let ocrError: string | null = null;
+      try {
+        ocrText = await runOcr(file);
+      } catch (e: unknown) {
+        ocrError = e instanceof Error ? e.message : String(e);
+        console.error("[upload] OCR failed for", file.name, ocrError);
+      }
+
+      // 3. Save OCR result as a companion .ocr.txt blob (used by the chat route)
+      const ocrBlobName = `${blobName}.ocr.txt`;
+      const ocrContent  = ocrText || `[OCR failed: ${ocrError}]`;
+      const ocrBlobUrl  = await uploadToBlob(
+        containerClient,
+        ocrBlobName,
+        Buffer.from(ocrContent, "utf-8"),
+        "text/plain; charset=utf-8"
+      );
+
+      results.push({
+        fileName:    file.name,
+        blobName,
+        blobUrl,
+        ocrBlobName,
+        ocrBlobUrl,
+        ocrText:     ocrText.slice(0, 500), // Preview only
       });
     }
 
-    // ------------------------------------------------------------------------
-    // ACTUAL AZURE BLOB UPLOAD LOGIC
-    // ------------------------------------------------------------------------
-    
-    // 1. Create the BlobServiceClient object with connection string
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-
-    // 2. Get a reference to a container
-    const containerClient = blobServiceClient.getContainerClient(containerName);
-
-    // Ensure the container exists
-    await containerClient.createIfNotExists();
-
-    // 3. Create a unique name for the blob
-    const blobName = `${Date.now()}-${file.name}`;
-
-    // 4. Get a block blob client
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-
-    // 5. Convert File to Buffer/ArrayBuffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // 6. Upload data to the blob
-    await blockBlobClient.uploadData(buffer, {
-      blobHTTPHeaders: { blobContentType: file.type }
+    return NextResponse.json({
+      message: `${results.length} file(s) uploaded and OCR'd successfully.`,
+      results,
     });
 
-    // ------------------------------------------------------------------------
-    // NEXT STEPS AFTER UPLOAD:
-    // - Trigger an Azure Function or background job to extract text from this document.
-    // - Chunk the extracted text.
-    // - Generate embeddings for each chunk.
-    // - Store chunks + embeddings in your Vector Database for the AI Search to use.
-    // ------------------------------------------------------------------------
-
-    return NextResponse.json({ 
-      message: "File uploaded successfully to Azure Blob Storage",
-      fileName: file.name,
-      blobUrl: blockBlobClient.url
-    });
-
-  } catch (error: any) {
-    console.error("Error uploading file:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[upload] Fatal error:", message);
     return NextResponse.json(
-      { error: "Failed to upload file to storage" },
+      { error: `Upload failed: ${message}` },
       { status: 500 }
     );
   }
