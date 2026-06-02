@@ -17,6 +17,7 @@ type Document = {
   name: string;
   blobName: string;
   url?: string;
+  uploadDate: string;
 };
 
 export default function LogsTab({
@@ -81,7 +82,46 @@ export default function LogsTab({
         <p className="text-gray-500 text-sm">History of your AI queries.</p>
       </div>
 
-      <div className="flex-1">
+      {/* Recent Documents */}
+      {!isLoading && documents.length > 0 && (
+        <div className="opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
+            Recent Documents
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {documents.slice(0, 3).map((doc) => {
+              const diffMs = Date.now() - new Date(doc.uploadDate || Date.now()).getTime();
+              const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+              const dateStr = diffDays === 0 ? "Today" : `${diffDays}d ago`;
+              
+              return (
+                <button
+                  key={doc.id}
+                  onClick={() =>
+                    onPreviewDoc({ id: doc.id, name: doc.name, url: doc.url })
+                  }
+                  className="flex items-start gap-3 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all text-left group min-w-0"
+                >
+                  <div className="mt-0.5 p-2 bg-gray-100/80 rounded-lg group-hover:bg-white transition-colors shrink-0">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {doc.name}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{dateStr}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 mt-6">
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
+          Search History
+        </h3>
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 border border-dashed border-gray-200 rounded-2xl text-gray-400 gap-3">
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -156,8 +196,9 @@ export default function LogsTab({
                             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Sources</span>
                             <div className="space-y-2">
                               {log.sources.map((src, idx) => {
+                                const docTitle = src.title || "Unknown Document";
                                 const isBest = idx === 0;
-                                const previewData = getDocPreviewData(src.title);
+                                const previewData = getDocPreviewData(docTitle);
                                 return (
                                   <button 
                                     key={idx} 
@@ -171,9 +212,9 @@ export default function LogsTab({
                                     <div className="flex-1 min-w-0">
                                       <p 
                                         className="text-sm font-medium text-gray-900 truncate" 
-                                        dir={/[\u0600-\u06FF]/.test(src.title) ? "rtl" : "ltr"}
+                                        dir={/[\u0600-\u06FF]/.test(docTitle) ? "rtl" : "ltr"}
                                       >
-                                        {src.title}
+                                        {docTitle}
                                       </p>
                                       {src.note && (
                                         <p 

@@ -185,7 +185,7 @@ export default function SearchTab({
     <div className="h-full flex flex-col items-center pt-24 px-8">
       <div
         className={`w-full max-w-3xl transition-all duration-500 ease-out ${
-          result ? "mt-0" : "mt-24"
+          result ? "mt-0" : "mt-8 md:mt-24"
         }`}
       >
         {/* Header — only shown when no result */}
@@ -364,7 +364,7 @@ export default function SearchTab({
 
         {/* Results */}
         {result && (
-          <div className="mt-12 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] flex flex-col gap-10 pb-24">
+          <div className="mt-6 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards] flex flex-col gap-8 pb-24">
             {/* Answer */}
             <div className="pl-6 border-l-2 border-black">
               <p
@@ -407,7 +407,8 @@ export default function SearchTab({
                     </p>
                   ) : (
                     result.sources.map((src, idx) => {
-                      const previewData = getDocPreviewData(src.title);
+                      const docTitle = src.title || "Unknown Document";
+                      const previewData = getDocPreviewData(docTitle);
                       const isBest = idx === 0;
                       return (
                         <button
@@ -430,9 +431,9 @@ export default function SearchTab({
                             <div className="flex items-center gap-2 flex-wrap">
                               <p
                                 className="text-sm font-medium text-gray-900 truncate"
-                                dir={isRtl(src.title) ? "rtl" : "ltr"}
+                                dir={isRtl(docTitle) ? "rtl" : "ltr"}
                               >
-                                {src.title}
+                                {docTitle}
                               </p>
                               {isBest && (
                                 <span className="shrink-0 text-xs px-2 py-0.5 bg-emerald-500 text-white rounded-full font-semibold">

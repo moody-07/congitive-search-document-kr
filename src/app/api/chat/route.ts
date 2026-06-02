@@ -185,8 +185,8 @@ ${contextBlock}
     }
 
     // Normalise sources — GPT may return objects or plain strings
-    const sources = (parsed.sources ?? []).map((s) => ({
-      title: typeof s === "string" ? s : s.title,
+    const sources = (parsed.sources ?? []).map((s: any) => ({
+      title: typeof s === "string" ? s : (s.title || s.name || s.document || "Unknown Document"),
       note:  typeof s === "string" ? "" : (s.note ?? ""),
     }));
 
