@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Loader2, ArrowRight, FileText, BookOpen } from "lucide-react";
+import { Search, Loader2, ArrowRight, FileText, BookOpen, X } from "lucide-react";
 
 type Document = {
   id: string;
@@ -13,6 +13,15 @@ type Document = {
 };
 
 type SearchResult = {
+  answer: string;
+  summary: string;
+  sources: { title: string; note: string }[];
+};
+
+type HistoryItem = {
+  id: string;
+  date: string;
+  query: string;
   answer: string;
   summary: string;
   sources: { title: string; note: string }[];
@@ -68,6 +77,9 @@ export default function SearchTab({
     { id: string; name: string; url?: string; date: string }[]
   >([]);
 
+  // Search history state
+  const [searchHistory, setSearchHistory] = useState<HistoryItem[]>([]);
+
   useEffect(() => {
     const loadDocuments = async () => {
       try {
@@ -99,6 +111,19 @@ export default function SearchTab({
       }
     };
     loadDocuments();
+
+    const loadHistory = async () => {
+      try {
+        const response = await fetch("/api/history");
+        if (response.ok) {
+          const data = await response.json();
+          setSearchHistory(data.history || []);
+        }
+      } catch (err) {
+        console.error("Failed to load search history:", err);
+      }
+    };
+    loadHistory();
   }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -195,10 +220,26 @@ export default function SearchTab({
               placeholder="Ask anything…"
               dir={queryIsRtl ? "rtl" : "ltr"}
               className={`w-full py-4 text-sm bg-white border border-gray-200 rounded-full focus:outline-none focus:border-gray-400 focus:ring-0 transition-all placeholder:text-gray-400 shadow-sm shadow-gray-100/50 ${
-                queryIsRtl ? "pr-12 pl-16" : "pl-12 pr-16"
+                queryIsRtl ? "pr-12 pl-24" : "pl-12 pr-24"
               }`}
               disabled={isLoading}
             />
+            {/* Clear button */}
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setResult(null);
+                  setError("");
+                }}
+                className={`absolute ${
+                  queryIsRtl ? "left-14" : "right-14"
+                } w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
             {/* Submit button — right for LTR, left for RTL */}
             <button
               type="submit"
@@ -260,6 +301,63 @@ export default function SearchTab({
                   </div>
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Search History */}
+        {!result && !isLoading && !error && searchHistory.length > 0 && (
+          <div className="mt-10 opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]" style={{ animationDelay: "0.1s" }}>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
+              Recent Searches
+            </h3>
+            <div className="grid grid-cols-1 gap-3">
+              {searchHistory.map((item) => {
+                const diffMs   = Date.now() - new Date(item.date).getTime();
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                let dateStr = new Date(item.date).toLocaleDateString();
+                if (diffMins < 60) {
+                  dateStr = `${diffMins} min${diffMins !== 1 ? "s" : ""} ago`;
+                } else if (diffHours < 24) {
+                  dateStr = `${diffHours} hr${diffHours !== 1 ? "s" : ""} ago`;
+                } else if (diffDays < 7) {
+                  dateStr = `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+                }
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setQuery(item.query);
+                      setResult({
+                        answer: item.answer,
+                        summary: item.summary,
+                        sources: item.sources,
+                      });
+                    }}
+                    className="flex flex-col gap-2 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all text-left group min-w-0"
+                  >
+                    <div className="flex items-start justify-between w-full min-w-0">
+                      <div 
+                        className="flex items-center gap-2 text-sm font-medium text-gray-900 min-w-0 flex-1"
+                        dir={isRtl(item.query) ? "rtl" : "ltr"}
+                      >
+                        <Search className="shrink-0 w-3 h-3 text-gray-400" />
+                        <span className="truncate">{item.query}</span>
+                      </div>
+                      <span className="text-xs text-gray-400 whitespace-nowrap ml-4 shrink-0 mt-0.5">{dateStr}</span>
+                    </div>
+                    <p 
+                      className={`text-xs text-gray-500 truncate w-full ${isRtl(item.answer) ? "pr-5" : "pl-5"}`}
+                      dir={isRtl(item.answer) ? "rtl" : "ltr"}
+                    >
+                      {item.answer}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

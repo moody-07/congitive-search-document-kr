@@ -5,7 +5,7 @@ import { ContainerClient } from "@azure/storage-blob";
 // ── Azure OpenAI client ──────────────────────────────────────────────────────
 
 const ENDPOINT  = "https://filechecker-foundary.cognitiveservices.azure.com/";
-const API_KEY   = process.env.AZURE_OPENAI_API_KEY!;
+const API_KEY   = "5CU49McL0XK9z87wOms8mUc2u1aqgWrrJdMoSnHLpnCQpwv3XMaeJQQJ99CEAC5RqLJXJ3w3AAAAACOGRBx1";
 const MODEL     = "gpt-5.1";
 const API_VER   = "2024-12-01-preview";
 
@@ -21,9 +21,9 @@ function getAIClient() {
 // ── Azure Blob helpers ───────────────────────────────────────────────────────
 
 function getContainerClient(): ContainerClient {
-  const accountUrl   = process.env.AZURE_STORAGE_ACCOUNT_URL!;
-  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
-  const sasToken     = process.env.AZURE_STORAGE_SAS_TOKEN!;
+  const accountUrl   = "https://filecheckerstorage.blob.core.windows.net";
+  const containerName = "files-from-project";
+  const sasToken     = "si=Ai&sv=2026-02-06&sr=c&sig=i5rU9xuYEtDZmaTJWBlzMujleCWEIiJr2of0UMzbvHY%3D";
 
   if (!accountUrl || !containerName || !sasToken) {
     throw new Error("Azure Storage credentials are not configured.");
@@ -68,6 +68,30 @@ async function loadAllOcrDocuments(): Promise<{ name: string; text: string }[]> 
   }
 
   return docs;
+}
+
+/** Save a search log to Blob Storage asynchronously */
+async function saveSearchLog(query: string, parsedResponse: any) {
+  try {
+    const container = getContainerClient();
+    const logId = Date.now().toString() + "-" + Math.random().toString(36).substring(2, 7);
+    const logName = `search-logs/log-${logId}.json`;
+    const logClient = container.getBlockBlobClient(logName);
+    
+    const logData = {
+      timestamp: new Date().toISOString(),
+      query,
+      answer: parsedResponse.answer,
+      summary: parsedResponse.summary,
+      sources: parsedResponse.sources,
+    };
+    
+    await logClient.uploadData(Buffer.from(JSON.stringify(logData, null, 2)), {
+      blobHTTPHeaders: { blobContentType: "application/json" }
+    });
+  } catch (err) {
+    console.error("[chat] Failed to save search log to Blob Storage:", err);
+  }
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────
@@ -164,11 +188,16 @@ ${contextBlock}
       note:  typeof s === "string" ? "" : (s.note ?? ""),
     }));
 
-    return NextResponse.json({
+    const finalResponse = {
       answer:  parsed.answer  || "ناتوانم وەڵامێکی دیاری بدەمەوە.",
       summary: parsed.summary || "",
       sources,
-    });
+    };
+
+    // Save search history in the background without blocking the user response
+    saveSearchLog(query, finalResponse);
+
+    return NextResponse.json(finalResponse);
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

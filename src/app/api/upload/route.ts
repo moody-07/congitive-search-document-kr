@@ -4,9 +4,9 @@ import { ContainerClient } from "@azure/storage-blob";
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 function getContainerClient(): ContainerClient {
-  const accountUrl    = process.env.AZURE_STORAGE_ACCOUNT_URL!;
-  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
-  const sasToken      = process.env.AZURE_STORAGE_SAS_TOKEN!;
+  const accountUrl    = "https://filecheckerstorage.blob.core.windows.net";
+  const containerName = "files-from-project";
+  const sasToken      = "si=Ai&sv=2026-02-06&sr=c&sig=i5rU9xuYEtDZmaTJWBlzMujleCWEIiJr2of0UMzbvHY%3D";
 
   if (!accountUrl || !containerName || !sasToken) {
     throw new Error("Azure Storage credentials are not configured.");

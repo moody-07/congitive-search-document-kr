@@ -31,7 +31,7 @@ export default function Home() {
       <main className="flex-1 overflow-y-auto relative">
         {activeTab === "search" && <SearchTab onSearchComplete={addSearchLog} onPreviewDoc={setPreviewDoc} />}
         {activeTab === "documents" && <DocManager onPreviewDoc={setPreviewDoc} />}
-        {activeTab === "logs" && <LogsTab logs={searchLogs} />}
+        {activeTab === "logs" && <LogsTab onPreviewDoc={setPreviewDoc} />}
       </main>
 
       <DocumentPreview doc={previewDoc} onClose={() => setPreviewDoc(null)} />

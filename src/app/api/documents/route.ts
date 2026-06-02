@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { ContainerClient } from "@azure/storage-blob";
 
 function getContainerClient() {
-  const accountUrl = process.env.AZURE_STORAGE_ACCOUNT_URL;
-  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
-  const sasToken = process.env.AZURE_STORAGE_SAS_TOKEN;
+  const accountUrl = "https://filecheckerstorage.blob.core.windows.net";
+  const containerName = "files-from-project";
+  const sasToken = "si=Ai&sv=2026-02-06&sr=c&sig=i5rU9xuYEtDZmaTJWBlzMujleCWEIiJr2of0UMzbvHY%3D";
 
   if (!accountUrl || !containerName || !sasToken) {
     throw new Error("Azure Storage credentials are not configured in environment variables.");
@@ -29,6 +29,8 @@ export async function GET() {
     for await (const blob of containerClient.listBlobsFlat()) {
       // Skip OCR companion text files — they are internal artefacts
       if (blob.name.endsWith(".ocr.txt")) continue;
+      // Skip search logs
+      if (blob.name.startsWith("search-logs/")) continue;
 
       // Build a preview/download URL using the container SAS token
       const blobUrl = `${accountUrl.replace(/\/$/, "")}/${containerName}/${encodeURIComponent(blob.name)}?${sasToken}`;

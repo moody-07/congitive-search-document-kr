@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { UploadCloud, FileText, Trash2, Loader2, CheckCircle2, AlertCircle, ScanLine } from "lucide-react";
+import { UploadCloud, FileText, Trash2, Loader2, CheckCircle2, AlertCircle, ScanLine, Search } from "lucide-react";
 
 type Document = {
   id: string;
@@ -37,6 +37,9 @@ export default function DocManager({
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadQueue, setUploadQueue] = useState<UploadStatus[]>([]);
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "name-asc" | "name-desc" | "size-desc">("date-desc");
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -175,6 +178,19 @@ export default function DocManager({
     (u) => u.stage === "done" || u.stage === "error"
   );
 
+  const filteredDocs = documents.filter((doc) =>
+    doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const sortedDocs = [...filteredDocs].sort((a, b) => {
+    if (sortBy === "date-desc") return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
+    if (sortBy === "date-asc") return new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime();
+    if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+    if (sortBy === "name-desc") return b.name.localeCompare(a.name);
+    if (sortBy === "size-desc") return b.size - a.size;
+    return 0;
+  });
+
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-10 pt-12 px-8 pb-24">
       <div>
@@ -306,20 +322,48 @@ export default function DocManager({
 
       {/* Document List */}
       <div>
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
-          Uploaded Files
-        </h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 px-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider shrink-0">
+            Uploaded Files ({documents.length})
+          </h3>
+          
+          {/* Search & Sort Controls */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search documents…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 focus:ring-0 transition-all placeholder:text-gray-400"
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 transition-all cursor-pointer text-gray-600 outline-none hover:bg-gray-50"
+            >
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="name-asc">A to Z</option>
+              <option value="name-desc">Z to A</option>
+              <option value="size-desc">Largest first</option>
+            </select>
+          </div>
+        </div>
+        
         <div className="flex flex-col gap-2">
           {isLoading ? (
             <div className="flex items-center justify-center p-12 text-gray-400 text-sm border border-gray-100 rounded-2xl">
               <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading files from Azure…
             </div>
-          ) : documents.length === 0 ? (
+          ) : sortedDocs.length === 0 ? (
             <div className="p-8 text-center text-gray-400 text-sm border border-gray-100 rounded-2xl">
-              No documents yet.
+              {documents.length > 0 ? "No documents match your search." : "No documents yet."}
             </div>
           ) : (
-            documents.map((doc) => (
+            sortedDocs.map((doc) => (
               <div
                 key={doc.id}
                 className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 hover:shadow-sm border border-transparent hover:border-gray-100 transition-all group"
