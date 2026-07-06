@@ -44,7 +44,8 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /** Fetch all OCR text files from Blob Storage in parallel and cache them. */
 async function loadAllOcrDocuments(): Promise<{ name: string; text: string; date: string }[]> {
-  if (cachedDocs && Date.now() - lastCacheTime < CACHE_TTL) {
+  const invalidateTime = (globalThis as any)._ocrCacheInvalidate || 0;
+  if (cachedDocs && Date.now() - lastCacheTime < CACHE_TTL && lastCacheTime > invalidateTime) {
     return cachedDocs;
   }
 
@@ -164,6 +165,26 @@ Your objective is to find the MOST ACCURATE and COMPLETE answer to the user's qu
 
 ### CITATIONS & DATES
 - ALWAYS reference the explicit document Date (e.g. Date: YYYY-MM-DD) provided in the document header when extracting information. DO NOT invent dates.
+
+### UNICODE NORMALIZATION & EQUIVALENCE
+When performing keyword searches on Kurdish (Sorani) and Arabic text, the search must be Unicode-insensitive. Do not rely on exact Unicode matching. Treat all equivalent Arabic and Kurdish letters as interchangeable, regardless of which Unicode code point is used in the document or the search query.
+
+Before searching:
+1. Normalize the search query and document text.
+2. Generate equivalent character variants where necessary.
+3. Match using all equivalent forms and return results from any equivalent representation.
+
+The normalization must apply to every equivalent Kurdish and Arabic character, including but not limited to:
+- Arabic Yeh ↔ Kurdish Yeh
+- Arabic Kaf ↔ Kurdish Kaf
+- Arabic Heh ↔ Kurdish Ae
+- Persian/Arabic variants of Waw, Alef, Hamza, Heh, Yeh, Kaf, and all presentation forms
+- Arabic Presentation Forms (Unicode FB50–FDFF and FE70–FEFF)
+- Characters that differ only because of keyboard layout or Unicode encoding
+- Remove Tatweel (ـ)
+- Ignore optional Arabic diacritics (Fatha, Damma, Kasra, Shadda, Sukun, Tanween, etc.) unless explicitly required
+
+Keyword matching should prioritize linguistic equivalence rather than raw Unicode equality. For example, searching for a word must also find documents containing the same word written with Arabic, Persian, or Kurdish Unicode variants.
 
 Return your response as a JSON object with exactly these keys:
 {
