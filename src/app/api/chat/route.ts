@@ -37,39 +37,59 @@ function getContainerClient(): ContainerClient {
   );
 }
 
-/** Fetch all OCR text files from Blob Storage and return them as a map of filename → text. */
-async function loadAllOcrDocuments(): Promise<{ name: string; text: string }[]> {
+// ── In-Memory Cache for Documents ────────────────────────────────────────────
+let cachedDocs: { name: string; text: string; date: string }[] | null = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/** Fetch all OCR text files from Blob Storage in parallel and cache them. */
+async function loadAllOcrDocuments(): Promise<{ name: string; text: string; date: string }[]> {
+  if (cachedDocs && Date.now() - lastCacheTime < CACHE_TTL) {
+    return cachedDocs;
+  }
+
   const container = getContainerClient();
-  const docs: { name: string; text: string }[] = [];
+  const blobItems = [];
 
   for await (const blob of container.listBlobsFlat()) {
-    if (!blob.name.endsWith(".ocr.txt")) continue;
-
-    // Derive the human-readable original filename from the blob name:
-    // format: <timestamp>-<safeName>.ocr.txt
-    const displayName = blob.name
-      .replace(/\.ocr\.txt$/, "")   // strip .ocr.txt
-      .replace(/^\d+-/, "");         // strip leading timestamp
-
-    try {
-      const blobClient = container.getBlobClient(blob.name);
-      const download = await blobClient.download();
-      const chunks: Buffer[] = [];
-      for await (const chunk of download.readableStreamBody as AsyncIterable<Buffer>) {
-        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-      }
-      const text = Buffer.concat(chunks).toString("utf-8").trim();
-
-      // Skip empty / failed OCR blobs
-      if (text && !text.startsWith("[OCR failed:")) {
-        docs.push({ name: displayName, text });
-      }
-    } catch (e) {
-      console.warn(`[chat] Could not read blob ${blob.name}:`, e);
+    if (blob.name.endsWith(".ocr.txt")) {
+      blobItems.push(blob);
     }
   }
 
-  return docs;
+  const docs = await Promise.all(
+    blobItems.map(async (blob) => {
+      // Derive the human-readable original filename from the blob name
+      const displayName = blob.name
+        .replace(/\.ocr\.txt$/, "")
+        .replace(/^\d+-/, "");
+
+      const dateObj = blob.properties.lastModified;
+      const dateStr = dateObj ? dateObj.toISOString().split("T")[0] : "Unknown Date";
+
+      try {
+        const blobClient = container.getBlobClient(blob.name);
+        const download = await blobClient.download();
+        const chunks: Buffer[] = [];
+        for await (const chunk of download.readableStreamBody as AsyncIterable<Buffer>) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        const text = Buffer.concat(chunks).toString("utf-8").trim();
+
+        // Skip empty / failed OCR blobs
+        if (text && !text.startsWith("[OCR failed:")) {
+          return { name: displayName, text, date: dateStr };
+        }
+      } catch (e) {
+        console.warn(`[chat] Could not read blob ${blob.name}:`, e);
+      }
+      return null;
+    })
+  );
+
+  cachedDocs = docs.filter((d): d is { name: string; text: string; date: string } => d !== null);
+  lastCacheTime = Date.now();
+  return cachedDocs;
 }
 
 /** Save a search log to Blob Storage asynchronously */
@@ -121,20 +141,29 @@ export async function POST(req: Request) {
     const contextBlock = docs
       .map(
         (doc, i) =>
-          `=== فایل ${i + 1}: ${doc.name} ===\n${doc.text}\n=== کۆتایی فایل ${i + 1} ===`
+          `=== فایل ${i + 1}: ${doc.name} (Date: ${doc.date}) ===\n${doc.text}\n=== کۆتایی فایل ${i + 1} ===`
       )
       .join("\n\n");
 
     // 3. System prompt — Kurdish-first, multilingual
-    const systemPrompt = `You are an expert document analyst specializing in Kurdish (Sorani), Arabic, and Persian documents related to construction projects, government contracts, and urban development.
+    const systemPrompt = `You are an expert document analyst and search engine specializing in Kurdish (Sorani), Arabic, and Persian documents related to construction projects, government contracts, and urban development.
 
-Your task:
-- Read ALL the documents provided below carefully.
-- Find ALL documents that are relevant to the user's question (there may be more than one).
-- Answer the question directly and accurately.
-- Always respond in the SAME language as the user's question. If the question is in Kurdish (Sorani), answer fully in Kurdish (Sorani).
-- Be specific: extract dates, names, amounts, locations, and project details when asked.
-- If no document contains the answer, say so clearly.
+Your objective is to find the MOST ACCURATE and COMPLETE answer to the user's query from the provided documents.
+
+### SEARCH & MATCHING STRATEGY
+- **Implicit Translation**: If the user asks in Kurdish but the documents are in Arabic or English (e.g., "پڕۆژەی داونتۆن" vs "Downtown project"), translate the keywords conceptually and search for all variations.
+- **Proper Names & Entities**: For names like "Downtown", search for exact English spelling ("Downtown") AND possible transliterations ("داونتۆن", "داون تاون", "داونتاون").
+- **OCR Error Resilience**: The documents are generated via OCR and may contain typos (e.g., "D0wntown", "Pr0ject"). Match words that are conceptually or phonetically identical.
+
+### EXTRACTION & ANSWERING
+- Read ALL the documents carefully. DO NOT stop at the first match.
+- Answer the question directly and thoroughly.
+- Be specific: extract exact numbers, dates, names, amounts, locations, and project details.
+- ALWAYS respond in the SAME language as the user's question. If the question is in Kurdish (Sorani), answer fully in natural, professional Kurdish (Sorani).
+- If no document contains the answer, say so clearly (e.g., "ببورە، هیچ زانیارییەک نەدۆزرایەوە"). Do not guess or hallucinate.
+
+### CITATIONS & DATES
+- ALWAYS reference the explicit document Date (e.g. Date: YYYY-MM-DD) provided in the document header when extracting information. DO NOT invent dates.
 
 Return your response as a JSON object with exactly these keys:
 {

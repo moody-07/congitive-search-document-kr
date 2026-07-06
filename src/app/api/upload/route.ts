@@ -35,7 +35,7 @@ async function uploadToBlob(
 /** Call the external OCR API and return extracted text. */
 async function runOcr(file: File): Promise<string> {
   const OCR_URL    = "https://stt.roshnaisunat.com/upload/";
-  const OCR_TOKEN  = "85pou";
+  const OCR_TOKEN  = "be1b0beb-9a04-4942-adbc-c57a16ea489b";
   const OCR_PROMPT = "تكایە دەقە لەوێنەكە بهێنەدەرەوە";
 
   const form = new FormData();
