@@ -114,6 +114,7 @@ async function saveSearchLog(query: string, parsedResponse: any, docsLastModifie
       answer: parsedResponse.answer,
       summary: parsedResponse.summary,
       sources: parsedResponse.sources,
+      processingTimeSec: parsedResponse.processingTimeSec,
       docsLastModified,
     };
     
@@ -152,6 +153,7 @@ async function loadAllSearchLogs() {
             answer: data.answer,
             summary: data.summary,
             sources: data.sources || [],
+            processingTimeSec: data.processingTimeSec || "0.0",
             docsLastModified: data.docsLastModified || 0,
           };
         }
@@ -196,6 +198,7 @@ export async function POST(req: Request) {
         ...cachedMatch,
         summary: cleanCachedSummary,
         processingTimeSec: ((Date.now() - startTime) / 1000).toFixed(1),
+        originalProcessingTimeSec: cachedMatch.processingTimeSec,
         cached: true,
       });
     }
