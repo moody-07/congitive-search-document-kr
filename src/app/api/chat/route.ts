@@ -153,7 +153,7 @@ async function loadAllSearchLogs() {
             answer: data.answer,
             summary: data.summary,
             sources: data.sources || [],
-            processingTimeSec: data.processingTimeSec || "0.0",
+            processingTimeSec: data.processingTimeSec,
             docsLastModified: data.docsLastModified || 0,
           };
         }

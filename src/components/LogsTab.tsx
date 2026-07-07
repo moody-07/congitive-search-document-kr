@@ -9,6 +9,7 @@ type HistoryItem = {
   query: string;
   answer: string;
   summary: string;
+  processingTimeSec?: string;
   sources: { title: string; note: string; documentNumber?: string | null }[];
 };
 
@@ -221,6 +222,15 @@ export default function LogsTab({
                             dir={/[\u0600-\u06FF]/.test(log.summary) ? "rtl" : "ltr"}
                           >
                             {log.summary}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {log.processingTimeSec && (
+                        <div>
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Analysis Time</span>
+                          <p className="text-sm text-gray-600">
+                            {log.processingTimeSec}s
                           </p>
                         </div>
                       )}

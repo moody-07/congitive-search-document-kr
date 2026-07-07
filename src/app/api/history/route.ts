@@ -42,6 +42,7 @@ export async function GET() {
           answer: data.answer,
           summary: cleanSummary,
           sources: data.sources || [],
+          processingTimeSec: data.processingTimeSec,
         });
       } catch (err) {
         console.warn(`[history] Could not read or parse blob ${blob.name}:`, err);

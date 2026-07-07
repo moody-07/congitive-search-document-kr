@@ -394,7 +394,7 @@ export default function SearchTab({
                 {result.processingTimeSec && (
                   <p className="text-xs text-gray-400 mt-4 font-medium flex flex-col gap-1">
                     <span>Analysis time: {result.processingTimeSec}s</span>
-                    {result.cached && result.originalProcessingTimeSec && (
+                    {result.cached && result.originalProcessingTimeSec && result.originalProcessingTimeSec !== "0.0" && (
                       <span className="text-gray-300">
                         (Cached, original analysis took: {result.originalProcessingTimeSec}s)
                       </span>
