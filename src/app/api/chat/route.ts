@@ -40,21 +40,27 @@ function getContainerClient(): ContainerClient {
 // ── In-Memory Cache for Documents ────────────────────────────────────────────
 let cachedDocs: { name: string; text: string; date: string }[] | null = null;
 let lastCacheTime = 0;
+let cachedDocsModifiedTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /** Fetch all OCR text files from Blob Storage in parallel and cache them. */
-async function loadAllOcrDocuments(): Promise<{ name: string; text: string; date: string }[]> {
+async function loadAllOcrDocuments(): Promise<{ docs: { name: string; text: string; date: string }[], docsLastModified: number }> {
   const invalidateTime = (globalThis as any)._ocrCacheInvalidate || 0;
   if (cachedDocs && Date.now() - lastCacheTime < CACHE_TTL && lastCacheTime > invalidateTime) {
-    return cachedDocs;
+    return { docs: cachedDocs, docsLastModified: cachedDocsModifiedTime };
   }
 
   const container = getContainerClient();
   const blobItems = [];
+  let maxModifiedTime = 0;
 
   for await (const blob of container.listBlobsFlat()) {
     if (blob.name.endsWith(".ocr.txt")) {
       blobItems.push(blob);
+      const modTime = blob.properties.lastModified?.getTime() || 0;
+      if (modTime > maxModifiedTime) {
+        maxModifiedTime = modTime;
+      }
     }
   }
 
@@ -89,12 +95,13 @@ async function loadAllOcrDocuments(): Promise<{ name: string; text: string; date
   );
 
   cachedDocs = docs.filter((d): d is { name: string; text: string; date: string } => d !== null);
+  cachedDocsModifiedTime = maxModifiedTime;
   lastCacheTime = Date.now();
-  return cachedDocs;
+  return { docs: cachedDocs, docsLastModified: cachedDocsModifiedTime };
 }
 
 /** Save a search log to Blob Storage asynchronously */
-async function saveSearchLog(query: string, parsedResponse: any) {
+async function saveSearchLog(query: string, parsedResponse: any, docsLastModified: number) {
   try {
     const container = getContainerClient();
     const logId = Date.now().toString() + "-" + Math.random().toString(36).substring(2, 7);
@@ -107,6 +114,7 @@ async function saveSearchLog(query: string, parsedResponse: any) {
       answer: parsedResponse.answer,
       summary: parsedResponse.summary,
       sources: parsedResponse.sources,
+      docsLastModified,
     };
     
     await logClient.uploadData(Buffer.from(JSON.stringify(logData, null, 2)), {
@@ -144,6 +152,7 @@ async function loadAllSearchLogs() {
             answer: data.answer,
             summary: data.summary,
             sources: data.sources || [],
+            docsLastModified: data.docsLastModified || 0,
           };
         }
       } catch (err) {
@@ -170,8 +179,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    // 1. Load every OCR document from Blob Storage
-    const docs = await loadAllOcrDocuments();
+    // 0. Load OCR documents (fast if cached in memory)
+    const { docs, docsLastModified } = await loadAllOcrDocuments();
+
+    // 1. Check cache first
+    const logsCache = await loadAllSearchLogs();
+    const cachedMatch = logsCache[query.trim().toLowerCase()];
+    
+    // Only use cache if it was created AFTER the last time ANY document was modified
+    if (cachedMatch && cachedMatch.docsLastModified >= docsLastModified) {
+      const cleanCachedSummary = (cachedMatch.summary || "")
+        .replace(/\n\n\*?Time taken to analyze.*\s*/g, "")
+        .replace(/\n\nAnalysis time:.*\s*/g, "");
+        
+      return NextResponse.json({
+        ...cachedMatch,
+        summary: cleanCachedSummary,
+        processingTimeSec: ((Date.now() - startTime) / 1000).toFixed(1),
+        cached: true,
+      });
+    }
 
     if (docs.length === 0) {
       return NextResponse.json({
@@ -304,11 +331,11 @@ ${contextBlock}
 
     // Update in-memory cache instantly
     if (cachedLogs) {
-      cachedLogs[query.trim().toLowerCase()] = finalResponse;
+      cachedLogs[query.trim().toLowerCase()] = { ...finalResponse, docsLastModified };
     }
 
     // Save search history in the background without blocking the user response
-    saveSearchLog(query, finalResponse);
+    saveSearchLog(query, finalResponse, docsLastModified);
 
     return NextResponse.json(finalResponse);
 

@@ -62,3 +62,30 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { id } = await req.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "Valid log id is required" }, { status: 400 });
+    }
+    
+    // Safety check - only allow deleting search logs
+    if (!id.startsWith("search-logs/")) {
+      return NextResponse.json({ error: "Invalid log id" }, { status: 400 });
+    }
+
+    const container = getContainerClient();
+    const blobClient = container.getBlobClient(id);
+    await blobClient.deleteIfExists();
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    console.error("[history] Error deleting log:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: `Failed to delete search log: ${message}` },
+      { status: 500 }
+    );
+  }
+}

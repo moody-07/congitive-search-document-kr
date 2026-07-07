@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { History, Loader2, Search, FileText } from "lucide-react";
+import { History, Loader2, Search, FileText, Trash2 } from "lucide-react";
 
 type HistoryItem = {
   id: string;
@@ -59,6 +59,27 @@ export default function LogsTab({
     };
     loadHistory();
   }, []);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this search history?")) return;
+    try {
+      const res = await fetch("/api/history", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((log) => log.id !== id));
+        if (expandedId === id) setExpandedId(null);
+      } else {
+        alert("Failed to delete the log.");
+      }
+    } catch (err) {
+      console.error("Failed to delete log:", err);
+      alert("Failed to delete the log.");
+    }
+  };
 
   // Find a clickable preview URL for a source returned by GPT
   const getDocPreviewData = (title: string) => {
@@ -159,9 +180,18 @@ export default function LogsTab({
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Query</span>
-                    <time className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                      {new Date(log.date).toLocaleString()}
-                    </time>
+                    <div className="flex items-center gap-2">
+                      <time className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
+                        {new Date(log.date).toLocaleString()}
+                      </time>
+                      <button 
+                        onClick={(e) => handleDelete(e, log.id)}
+                        className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                        title="Delete this history"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                   <div 
                     className="flex items-start gap-2 text-sm text-gray-900 font-medium mb-4"
