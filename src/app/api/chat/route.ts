@@ -170,23 +170,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    // 0. Check cache first
-    const logsCache = await loadAllSearchLogs();
-    const cachedMatch = logsCache[query.trim().toLowerCase()];
-    if (cachedMatch) {
-      // Clean any accidentally saved timing strings from the cached summary
-      const cleanCachedSummary = (cachedMatch.summary || "")
-        .replace(/\n\n\*?Time taken to analyze.*\s*/g, "")
-        .replace(/\n\nAnalysis time:.*\s*/g, "");
-        
-      return NextResponse.json({
-        ...cachedMatch,
-        summary: cleanCachedSummary,
-        processingTimeSec: ((Date.now() - startTime) / 1000).toFixed(1),
-        cached: true,
-      });
-    }
-
     // 1. Load every OCR document from Blob Storage
     const docs = await loadAllOcrDocuments();
 
