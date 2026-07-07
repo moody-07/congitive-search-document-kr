@@ -3,8 +3,8 @@ const { parse } = require('url')
 const next = require('next')
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
-const port = process.env.PORT || 3000
+const hostname = '0.0.0.0'
+const port = process.env.PORT || 8080
 
 // Initialize the Next.js application
 const app = next({ dev, hostname, port })
