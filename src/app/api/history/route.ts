@@ -31,12 +31,16 @@ export async function GET() {
           chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         }
         const data = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+        const cleanSummary = (data.summary || "")
+          .replace(/\n\n\*?Time taken to analyze.*\s*/g, "")
+          .replace(/\n\nAnalysis time:.*\s*/g, "");
+          
         history.push({
           id: blob.name,
           date: blob.properties.lastModified?.toISOString() || data.timestamp || new Date().toISOString(),
           query: data.query,
           answer: data.answer,
-          summary: data.summary,
+          summary: cleanSummary,
           sources: data.sources || [],
         });
       } catch (err) {

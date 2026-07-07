@@ -6,12 +6,13 @@ import Sidebar from "@/components/Sidebar";
 import SearchTab from "@/components/SearchTab";
 import DocManager from "@/components/DocManager";
 import LogsTab from "@/components/LogsTab";
+import BalanceTab from "@/components/BalanceTab";
 import DocumentPreview, { PreviewDoc } from "@/components/DocumentPreview";
 
 import { SearchLog } from "@/types";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"search" | "documents" | "logs">("search");
+  const [activeTab, setActiveTab] = useState<"search" | "documents" | "logs" | "balance">("search");
   const [searchLogs, setSearchLogs] = useState<SearchLog[]>([]);
   const [previewDoc, setPreviewDoc] = useState<PreviewDoc>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,6 +55,7 @@ export default function Home() {
           {activeTab === "search" && <SearchTab onSearchComplete={addSearchLog} onPreviewDoc={setPreviewDoc} />}
           {activeTab === "documents" && <DocManager onPreviewDoc={setPreviewDoc} />}
           {activeTab === "logs" && <LogsTab onPreviewDoc={setPreviewDoc} />}
+          {activeTab === "balance" && <BalanceTab />}
         </div>
       </main>
 

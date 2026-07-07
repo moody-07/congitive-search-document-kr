@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { UploadCloud, FileText, Trash2, Loader2, CheckCircle2, AlertCircle, ScanLine, Search } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
+import { useConfirm } from "@/context/ConfirmContext";
 
 type Document = {
   id: string;
@@ -33,6 +35,8 @@ export default function DocManager({
 }: {
   onPreviewDoc: (doc: { id: string; name: string; url?: string }) => void;
 }) {
+  const { showToast } = useToast();
+  const { askConfirmation } = useConfirm();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,26 +141,33 @@ export default function DocManager({
   };
 
   const handleDelete = async (blobName: string) => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
-    try {
-      const res = await fetch(
-        `/api/documents?blobName=${encodeURIComponent(blobName)}`,
-        { method: "DELETE" }
-      );
-      if (!res.ok) throw new Error("Delete failed");
+    askConfirmation({
+      title: "Delete Document",
+      message: "Are you sure you want to delete this document? This action cannot be undone.",
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(
+            `/api/documents?blobName=${encodeURIComponent(blobName)}`,
+            { method: "DELETE" }
+          );
+          if (!res.ok) throw new Error("Delete failed");
 
-      // Also try to delete the companion OCR blob
-      const ocrBlobName = `${blobName}.ocr.txt`;
-      await fetch(
-        `/api/documents?blobName=${encodeURIComponent(ocrBlobName)}`,
-        { method: "DELETE" }
-      ).catch(() => {/* ignore if not found */});
+          // Also try to delete the companion OCR blob
+          const ocrBlobName = `${blobName}.ocr.txt`;
+          await fetch(
+            `/api/documents?blobName=${encodeURIComponent(ocrBlobName)}`,
+            { method: "DELETE" }
+          ).catch(() => {/* ignore if not found */});
 
-      setDocuments((prev) => prev.filter((doc) => doc.blobName !== blobName));
-    } catch (error) {
-      console.error("Error deleting document:", error);
-      alert("Failed to delete document.");
-    }
+          setDocuments((prev) => prev.filter((doc) => doc.blobName !== blobName));
+          showToast("Document deleted successfully.", "success");
+        } catch (error) {
+          console.error("Error deleting document:", error);
+          showToast("Failed to delete document.", "error");
+        }
+      }
+    });
   };
 
   const clearDoneUploads = () => {

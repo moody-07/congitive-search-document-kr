@@ -15,7 +15,9 @@ type Document = {
 type SearchResult = {
   answer: string;
   summary: string;
-  sources: { title: string; note: string }[];
+  sources: { title: string; note: string; documentNumber?: string | null }[];
+  processingTimeSec?: string;
+  cached?: boolean;
 };
 
 type HistoryItem = {
@@ -24,7 +26,7 @@ type HistoryItem = {
   query: string;
   answer: string;
   summary: string;
-  sources: { title: string; note: string }[];
+  sources: { title: string; note: string; documentNumber?: string | null }[];
 };
 
 /** Detect if a string contains Kurdish/Arabic/RTL characters */
@@ -388,6 +390,11 @@ export default function SearchTab({
                 >
                   {renderMarkdown(result.summary)}
                 </p>
+                {result.processingTimeSec && (
+                  <p className="text-xs text-gray-400 mt-4 font-medium">
+                    Analysis time: {result.processingTimeSec}s
+                  </p>
+                )}
               </div>
 
               {/* Sources */}
@@ -441,6 +448,11 @@ export default function SearchTab({
                                 </span>
                               )}
                             </div>
+                            {src.documentNumber && (
+                              <p className="text-xs font-mono text-blue-600 mt-1 bg-blue-50 inline-block px-1.5 py-0.5 rounded">
+                                Doc No: {src.documentNumber}
+                              </p>
+                            )}
                             {src.note && (
                               <p
                                 className="text-xs text-gray-500 mt-1 leading-relaxed"

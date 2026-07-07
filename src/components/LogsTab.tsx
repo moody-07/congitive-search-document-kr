@@ -9,7 +9,7 @@ type HistoryItem = {
   query: string;
   answer: string;
   summary: string;
-  sources: { title: string; note: string }[];
+  sources: { title: string; note: string; documentNumber?: string | null }[];
 };
 
 type Document = {
@@ -133,113 +133,134 @@ export default function LogsTab({
             <p className="text-sm">No search history yet.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-100 before:to-transparent">
+          <div className="flex flex-col gap-4">
             {history.map((log) => {
               const isRtl = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(log.query);
               const answerIsRtl = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(log.answer);
               const isExpanded = expandedId === log.id;
               
               return (
-                <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border border-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors ${isExpanded ? "bg-black text-white" : "bg-gray-50 text-gray-400"}`}>
-                    <div className={`w-2 h-2 rounded-full ${isExpanded ? "bg-emerald-400" : "bg-black"}`}></div>
+                <div 
+                  key={log.id} 
+                  onClick={() => {
+                    // Toggle expansion
+                    setExpandedId(isExpanded ? null : log.id);
+                    // Automatically open the first related document
+                    if (!isExpanded && log.sources && log.sources.length > 0) {
+                      const firstDocTitle = log.sources[0].title || "Unknown Document";
+                      onPreviewDoc(getDocPreviewData(firstDocTitle));
+                    }
+                  }}
+                  className={`w-full p-5 rounded-2xl border transition-all cursor-pointer ${
+                    isExpanded 
+                      ? "bg-white border-black shadow-md ring-1 ring-black/5" 
+                      : "bg-white border-gray-100 shadow-sm shadow-gray-100/50 hover:border-gray-300 hover:shadow-md"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Query</span>
+                    <time className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
+                      {new Date(log.date).toLocaleString()}
+                    </time>
+                  </div>
+                  <div 
+                    className="flex items-start gap-2 text-sm text-gray-900 font-medium mb-4"
+                    dir={isRtl ? "rtl" : "ltr"}
+                  >
+                    <Search className={`shrink-0 w-4 h-4 mt-0.5 transition-colors ${isExpanded ? "text-black" : "text-gray-400"}`} />
+                    <span>{log.query}</span>
                   </div>
                   
-                  <div 
-                    onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                    className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl border transition-all cursor-pointer ${
-                      isExpanded 
-                        ? "bg-white border-black shadow-md ring-1 ring-black/5" 
-                        : "bg-white border-gray-100 shadow-sm shadow-gray-100/50 hover:border-gray-300 hover:shadow-md"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Query</span>
-                      <time className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                        {new Date(log.date).toLocaleString()}
-                      </time>
-                    </div>
-                    <div 
-                      className="flex items-start gap-2 text-sm text-gray-900 font-medium mb-4"
-                      dir={isRtl ? "rtl" : "ltr"}
+                  <div className="pt-4 border-t border-gray-50">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">AI Response</span>
+                    <p 
+                      className={`text-sm text-gray-500 leading-relaxed ${isExpanded ? "" : "line-clamp-4"}`}
+                      dir={answerIsRtl ? "rtl" : "ltr"}
                     >
-                      <Search className={`shrink-0 w-4 h-4 mt-0.5 transition-colors ${isExpanded ? "text-black" : "text-gray-400"}`} />
-                      <span>{log.query}</span>
-                    </div>
-                    
-                    <div className="pt-4 border-t border-gray-50">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">AI Response</span>
-                      <p 
-                        className={`text-sm text-gray-500 leading-relaxed ${isExpanded ? "" : "line-clamp-4"}`}
-                        dir={answerIsRtl ? "rtl" : "ltr"}
-                      >
-                        {log.answer}
-                      </p>
-                    </div>
-
-                    {isExpanded && (
-                      <div className="mt-6 pt-6 border-t border-gray-100 space-y-6 animate-[fadeIn_0.3s_ease-out_forwards] opacity-0">
-                        {log.summary && (
-                          <div>
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Summary</span>
-                            <p 
-                              className="text-sm text-gray-600 leading-relaxed" 
-                              dir={/[\u0600-\u06FF]/.test(log.summary) ? "rtl" : "ltr"}
-                            >
-                              {log.summary}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {log.sources && log.sources.length > 0 && (
-                          <div>
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Sources</span>
-                            <div className="space-y-2">
-                              {log.sources.map((src, idx) => {
-                                const docTitle = src.title || "Unknown Document";
-                                const isBest = idx === 0;
-                                const previewData = getDocPreviewData(docTitle);
-                                return (
-                                  <button 
-                                    key={idx} 
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // prevent collapsing the card
-                                      onPreviewDoc(previewData);
-                                    }}
-                                    className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all hover:shadow-sm ${isBest ? "bg-emerald-50/50 border-emerald-100 hover:bg-emerald-50" : "bg-gray-50 border-transparent hover:bg-white hover:border-gray-200"}`}
-                                  >
-                                    <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${isBest ? "text-emerald-500" : "text-gray-400"}`} />
-                                    <div className="flex-1 min-w-0">
-                                      <p 
-                                        className="text-sm font-medium text-gray-900 truncate" 
-                                        dir={/[\u0600-\u06FF]/.test(docTitle) ? "rtl" : "ltr"}
-                                      >
-                                        {docTitle}
-                                      </p>
-                                      {src.note && (
-                                        <p 
-                                          className="text-xs text-gray-500 mt-1 leading-relaxed" 
-                                          dir={/[\u0600-\u06FF]/.test(src.note) ? "rtl" : "ltr"}
-                                        >
-                                          {src.note}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      {log.answer}
+                    </p>
                   </div>
+
+                  {isExpanded && (
+                    <div className="mt-6 pt-6 border-t border-gray-100 space-y-6 animate-[fadeIn_0.3s_ease-out_forwards] opacity-0">
+                      {log.summary && (
+                        <div>
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Summary</span>
+                          <p 
+                            className="text-sm text-gray-600 leading-relaxed" 
+                            dir={/[\u0600-\u06FF]/.test(log.summary) ? "rtl" : "ltr"}
+                          >
+                            {log.summary}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {log.sources && log.sources.length > 0 && (
+                        <div>
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Sources</span>
+                          <div className="space-y-2">
+                            {log.sources.map((src, idx) => {
+                              const docTitle = src.title || "Unknown Document";
+                              const isBest = idx === 0;
+                              const previewData = getDocPreviewData(docTitle);
+                              return (
+                                <button 
+                                  key={idx} 
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // prevent collapsing the card
+                                    onPreviewDoc(previewData);
+                                  }}
+                                  className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all hover:shadow-sm ${isBest ? "bg-emerald-50/50 border-emerald-100 hover:bg-emerald-50" : "bg-gray-50 border-transparent hover:bg-white hover:border-gray-200"}`}
+                                >
+                                  <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${isBest ? "text-emerald-500" : "text-gray-400"}`} />
+                                  <div className="flex-1 min-w-0">
+                                    <p 
+                                      className="text-sm font-medium text-gray-900 truncate" 
+                                      dir={/[\u0600-\u06FF]/.test(docTitle) ? "rtl" : "ltr"}
+                                    >
+                                      {docTitle}
+                                    </p>
+                                    {src.documentNumber && (
+                                      <p className="text-xs font-mono text-blue-600 mt-1 bg-blue-50 inline-block px-1.5 py-0.5 rounded">
+                                        Doc No: {src.documentNumber}
+                                      </p>
+                                    )}
+                                    {src.note && (
+                                      <p 
+                                        className="text-xs text-gray-500 mt-1 leading-relaxed" 
+                                        dir={/[\u0600-\u06FF]/.test(src.note) ? "rtl" : "ltr"}
+                                      >
+                                        {src.note}
+                                      </p>
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         )}
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

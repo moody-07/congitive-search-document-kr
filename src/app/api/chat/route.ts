@@ -117,14 +117,74 @@ async function saveSearchLog(query: string, parsedResponse: any) {
   }
 }
 
+// ── In-Memory Cache for Search Logs ──────────────────────────────────────────
+let cachedLogs: Record<string, any> | null = null;
+let lastLogsCacheTime = 0;
+
+async function loadAllSearchLogs() {
+  if (cachedLogs && Date.now() - lastLogsCacheTime < CACHE_TTL) {
+    return cachedLogs;
+  }
+
+  const container = getContainerClient();
+  const logs: Record<string, any> = {};
+
+  try {
+    for await (const blob of container.listBlobsFlat({ prefix: "search-logs/" })) {
+      try {
+        const blobClient = container.getBlobClient(blob.name);
+        const download = await blobClient.download();
+        const chunks: Buffer[] = [];
+        for await (const chunk of download.readableStreamBody as AsyncIterable<Buffer>) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        const data = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+        if (data.query) {
+          logs[data.query.trim().toLowerCase()] = {
+            answer: data.answer,
+            summary: data.summary,
+            sources: data.sources || [],
+          };
+        }
+      } catch (err) {
+        // ignore individual parse errors
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to list search logs", err);
+  }
+
+  cachedLogs = logs;
+  lastLogsCacheTime = Date.now();
+  return cachedLogs;
+}
+
 // ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
+    const startTime = Date.now();
     const { query } = await req.json();
 
     if (!query?.trim()) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
+    }
+
+    // 0. Check cache first
+    const logsCache = await loadAllSearchLogs();
+    const cachedMatch = logsCache[query.trim().toLowerCase()];
+    if (cachedMatch) {
+      // Clean any accidentally saved timing strings from the cached summary
+      const cleanCachedSummary = (cachedMatch.summary || "")
+        .replace(/\n\n\*?Time taken to analyze.*\s*/g, "")
+        .replace(/\n\nAnalysis time:.*\s*/g, "");
+        
+      return NextResponse.json({
+        ...cachedMatch,
+        summary: cleanCachedSummary,
+        processingTimeSec: ((Date.now() - startTime) / 1000).toFixed(1),
+        cached: true,
+      });
     }
 
     // 1. Load every OCR document from Blob Storage
@@ -188,11 +248,14 @@ Keyword matching should prioritize linguistic equivalence rather than raw Unicod
 
 Return your response as a JSON object with exactly these keys:
 {
-  "answer": "<your detailed answer in the same language as the question>",
-  "summary": "<a short 1-2 sentence summary>",
+  "answer": "<your detailed answer in the same language as the question. Mention the document number if present.>",
+  "summary": "Must follow this EXACT structure (in the query's language, use N/A if not found):\nDate: <date>\nNumber: <document number>\nDocument Title: <document title>\n\n<1-2 sentences about the document>",
   "sources": [
-    { "title": "<filename of MOST relevant doc>", "note": "<one sentence why this is most relevant>" },
-    { "title": "<filename of second relevant doc>", "note": "<one sentence why>" }
+    { 
+      "title": "<filename of MOST relevant doc>", 
+      "note": "<one sentence why this is most relevant>",
+      "documentNumber": "<extract document number or 'ژمارەی نووسراو' from the document text if present, otherwise null>"
+    }
   ]
 }
 
@@ -200,6 +263,7 @@ Rules for sources:
 - Order sources from MOST relevant to LEAST relevant.
 - Include ALL documents that mention or relate to the question — do not omit any.
 - The "note" should be in the same language as the user's question.
+- Extract the document number (e.g. ژمارەی نووسراو, No.) if present in the document.
 - Do NOT include documents that have no relation to the question.
 
 Do NOT wrap the JSON in markdown code blocks.
@@ -226,7 +290,7 @@ ${contextBlock}
     let parsed: {
       answer?: string;
       summary?: string;
-      sources?: ({ title: string; note?: string } | string)[];
+      sources?: ({ title: string; note?: string; documentNumber?: string | null } | string)[];
     };
     try {
       parsed = JSON.parse(raw);
@@ -238,13 +302,27 @@ ${contextBlock}
     const sources = (parsed.sources ?? []).map((s: any) => ({
       title: typeof s === "string" ? s : (s.title || s.name || s.document || "Unknown Document"),
       note:  typeof s === "string" ? "" : (s.note ?? ""),
+      documentNumber: typeof s === "object" ? (s.documentNumber ?? null) : null,
     }));
+
+    const processingTimeSec = ((Date.now() - startTime) / 1000).toFixed(1);
+    
+    // Clean any accidentally saved timing strings from the base summary
+    const cleanSummary = (parsed.summary || "")
+      .replace(/\n\n\*?Time taken to analyze.*\s*/g, "")
+      .replace(/\n\nAnalysis time:.*\s*/g, "");
 
     const finalResponse = {
       answer:  parsed.answer  || "ناتوانم وەڵامێکی دیاری بدەمەوە.",
-      summary: parsed.summary || "",
+      summary: cleanSummary,
       sources,
+      processingTimeSec,
     };
+
+    // Update in-memory cache instantly
+    if (cachedLogs) {
+      cachedLogs[query.trim().toLowerCase()] = finalResponse;
+    }
 
     // Save search history in the background without blocking the user response
     saveSearchLog(query, finalResponse);

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { X, FileText, Download, AlertCircle, Save, Loader2, RefreshCw } from "lucide-react";
 
+import { useConfirm } from "@/context/ConfirmContext";
+
 export type PreviewDoc = {
   id: string; // The blobName is used as ID in DocManager
   name: string;
@@ -16,6 +18,7 @@ export default function DocumentPreview({
   doc: PreviewDoc; 
   onClose: () => void 
 }) {
+  const { askConfirmation } = useConfirm();
   const [activeTab, setActiveTab] = useState<"preview" | "ocr">("preview");
   const [ocrText, setOcrText] = useState("");
   const [isLoadingOcr, setIsLoadingOcr] = useState(false);
@@ -75,29 +78,35 @@ export default function DocumentPreview({
 
   const redoOcr = async () => {
     if (!doc) return;
-    if (!confirm("Are you sure you want to re-run OCR? This will overwrite the current text.")) return;
-    setIsRedoingOcr(true);
-    setSaveMessage({ text: "", type: "" });
-    try {
-      const res = await fetch(`/api/documents/ocr/redo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blobName: doc.id }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setOcrText(data.text);
-        setSaveMessage({ text: "OCR redone successfully!", type: "success" });
-        setTimeout(() => setSaveMessage({ text: "", type: "" }), 3000);
-      } else {
-        const err = await res.json();
-        setSaveMessage({ text: err.error || "Failed to redo OCR.", type: "error" });
+    askConfirmation({
+      title: "Re-run OCR",
+      message: "Are you sure you want to re-run OCR? This will overwrite the current text.",
+      confirmText: "Re-run OCR",
+      onConfirm: async () => {
+        setIsRedoingOcr(true);
+        setSaveMessage({ text: "", type: "" });
+        try {
+          const res = await fetch(`/api/documents/ocr/redo`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ blobName: doc.id }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setOcrText(data.text);
+            setSaveMessage({ text: "OCR redone successfully!", type: "success" });
+            setTimeout(() => setSaveMessage({ text: "", type: "" }), 3000);
+          } else {
+            const err = await res.json();
+            setSaveMessage({ text: err.error || "Failed to redo OCR.", type: "error" });
+          }
+        } catch (err) {
+          setSaveMessage({ text: "Error redoing OCR.", type: "error" });
+        } finally {
+          setIsRedoingOcr(false);
+        }
       }
-    } catch (err) {
-      setSaveMessage({ text: "Error redoing OCR.", type: "error" });
-    } finally {
-      setIsRedoingOcr(false);
-    }
+    });
   };
 
   if (!doc) return null;
